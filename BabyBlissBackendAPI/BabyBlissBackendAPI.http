@@ -1,0 +1,6 @@
+@BabyBlissBackendAPI_HostAddress = http://localhost:5166
+
+GET {{BabyBlissBackendAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
