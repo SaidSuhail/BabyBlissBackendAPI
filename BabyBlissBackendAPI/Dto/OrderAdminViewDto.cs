@@ -11,6 +11,8 @@
         public string UserAddress { get; set; }
         public string UserName { get; set;}
         public string Phone { get; set; }
+        public decimal TotalPrice { get; set; } // Added TotalPrice field
+
 
     }
 }

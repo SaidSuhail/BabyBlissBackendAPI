@@ -23,7 +23,7 @@ namespace BabyBlissBackendAPI.Controllers
             {
                 var user_id = Convert.ToInt32(HttpContext.Items["Id"]);
                 var res = await _addressServices.AddnewAddress(user_id,_dto);          
-                return NotFound(new ApiResponse<string>(true, "Address Added Successfully", "[done]", null));
+                return Ok(new ApiResponse<string>(true, "Address Added Successfully", "[done]", null));
                 
             }
             catch(Exception ex)

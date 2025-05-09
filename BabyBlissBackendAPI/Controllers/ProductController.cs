@@ -204,5 +204,19 @@ namespace BabyBlissBackendAPI.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        [HttpGet("paginated")]
+        public async Task<ActionResult<PagedResponseDTO<ProductViewDto>>> GetPaginatedProducts(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var result = await _Services.GetPaginatedProducts(pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
     }
 }

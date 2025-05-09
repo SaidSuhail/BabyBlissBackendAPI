@@ -115,6 +115,7 @@ namespace BabyBlissBackendAPI.Services.CartServices
                 {
                     ProductId = productId,
                     CartId = user._Cart.Id,
+
                    
                 };
                 _context.cartItems.Add(newItem);
@@ -205,6 +206,7 @@ namespace BabyBlissBackendAPI.Services.CartServices
 
                     return new ApiResponse<CartViewDto>(false, "Out of stock", null, "Check the informations");
 
+
                 }
 
                 item.ProductQty++;
@@ -274,6 +276,24 @@ namespace BabyBlissBackendAPI.Services.CartServices
             {
                 throw new InvalidOperationException(ex.Message);
             }
+        }
+
+        public async Task<ApiResponse<string>> ClearCart(int userId)
+        {
+            var user = await _context.users
+                .Include(u => u._Cart)
+                .ThenInclude(c => c._Items)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null || user._Cart == null)
+            {
+                return new ApiResponse<string>(false, "User or cart not found", null, "Invalid User");
+            }
+
+            user._Cart._Items.Clear(); // Clears all cart items
+            await _context.SaveChangesAsync();
+
+            return new ApiResponse<string>(true, "Cart cleared successfully", null, null);
         }
 
     }

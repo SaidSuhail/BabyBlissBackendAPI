@@ -13,5 +13,7 @@ namespace BabyBlissBackendAPI.Services.ProductServices
         Task UpdatePro(int id, UpdateProductDto addpro, IFormFile image);
         Task<List<ProductWithCategoryDto>> SearchProduct(string search);
         Task<List<ProductWithCategoryDto>> HotDeals();
+        Task<PagedResponseDTO<ProductViewDto>> GetPaginatedProducts(int pageNumber, int pageSize);
+
     }
 }

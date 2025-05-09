@@ -34,7 +34,7 @@ namespace BabyBlissBackendAPI.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult>Login([FromForm]UserLoginDto login)
+        public async Task<IActionResult>Login(UserLoginDto login)
         {
             try
             {

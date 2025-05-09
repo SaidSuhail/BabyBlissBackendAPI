@@ -17,7 +17,6 @@ namespace BabyBlissBackendAPI.Dto
         public decimal ProductPrice { get; set; }
         [Required]
         public decimal OfferPrize { get; set; }
-        //public string CategoryName { get; set; }
 
         [Required]
         public int CategoryId { get; set; }

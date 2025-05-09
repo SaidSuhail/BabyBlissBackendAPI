@@ -10,5 +10,7 @@ namespace BabyBlissBackendAPI.Services.CartServices
         Task<ApiResponse<string>> RemoveFromCart(int userId, int ProductId);
         Task<ApiResponse<CartViewDto>> IncraseQuantity(int userId, int productId);
         Task<ApiResponse<CartViewDto>> DecreaseQuantity(int userId, int ProductId);
+        Task<ApiResponse<string>> ClearCart(int userId);
+
     }
 }

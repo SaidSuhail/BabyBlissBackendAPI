@@ -33,22 +33,12 @@ namespace BabyBlissBackendAPI.Services.AuthServices
                 {
                     return false; // User already exists
                 }
-
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userRegistrationDto.Password);
 
                 var user = _mapper.Map<User>(userRegistrationDto);
                 user.Password = hashedPassword;
 
-                //// If the Role is provided, use it; otherwise, set default to 'User'
-                //if (Enum.TryParse(userRegistrationDto.Role, true, out User.UserRole role))
-                //{
-                //    // Assign the string value of the role enum
-                //    user.Role = role; // 'User' or 'Admin'
-                //}
-                //else
-                //{
-                    user.Role = User.UserRole.User; // Default to 'User' if invalid or not provided
-                //}
+                user.Role = User.UserRole.User; 
 
                 _context.users.Add(user);
                 await _context.SaveChangesAsync();

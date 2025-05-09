@@ -32,7 +32,7 @@ namespace BabyBlissBackendAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [Authorize(Roles ="Admin")]
+        [Authorize]
         [HttpGet("UserById/{id}")]
         public async Task<IActionResult>UserById(int id)
         {
@@ -42,7 +42,7 @@ namespace BabyBlissBackendAPI.Controllers
 
                 if(user == null)
                 {
-                    return NotFound(new ApiResponse<string>(false, "No m]Matched users in the list", "", null));
+                    return NotFound(new ApiResponse<string>(false, "No Matched users in the list", "", null));
                 }
                 return Ok(new ApiResponse<UserViewDto>(true, "done", user, null));
             }
@@ -52,7 +52,7 @@ namespace BabyBlissBackendAPI.Controllers
             }
         }
 
-        [HttpPatch("Block/Unblock{id}")]
+        [HttpPatch("Block/Unblock/{id}")]
         [Authorize(Roles ="Admin")]
         public async Task<IActionResult>block_unb(int id)
         {

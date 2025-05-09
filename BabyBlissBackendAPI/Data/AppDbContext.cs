@@ -90,7 +90,7 @@ namespace BabyBlissBackendAPI.Data
 
             modelBuilder.Entity<Order>()
                 .Property(pr => pr.OrderStatus)
-                .HasDefaultValue("OderPlaced");
+                .HasDefaultValue("ORDER PLACED");
 
             modelBuilder.Entity<Order>()
                 .Property(pr => pr.Total)

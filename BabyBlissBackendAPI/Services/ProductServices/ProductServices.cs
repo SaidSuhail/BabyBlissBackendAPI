@@ -182,13 +182,8 @@ namespace BabyBlissBackendAPI.Services.ProductServices
                 if (addPro.OfferPrize != null) pro.offerPrize = addPro.OfferPrize.Value;
                 if (addPro.Rating != null) pro.Rating = addPro.Rating.Value;
                 if (addPro.CategoryId != null) pro.CategoryId = addPro.CategoryId.Value;
-
-                //if (pro != null)
-                //{
-
-                    //_mapper.Map(addPro, pro);
-
-
+                    
+              
                     if (image != null && image.Length > 0)
                     {
                         string imgUrl = await _cloudinary.UploadImageAsync(image);
@@ -196,11 +191,7 @@ namespace BabyBlissBackendAPI.Services.ProductServices
                     }
 
                     await _context.SaveChangesAsync();
-                //}
-                //else
-                //{
-                //    throw new Exception($"Product with ID: {id} not found!");
-                //}
+               
             }
             catch (Exception ex)
             {
@@ -226,5 +217,46 @@ namespace BabyBlissBackendAPI.Services.ProductServices
                 throw new Exception(ex.Message);
             }
         }
+        public async Task<PagedResponseDTO<ProductViewDto>> GetPaginatedProducts(int pageNumber, int pageSize)
+        {
+            try
+            {
+                var totalCount = await _context.products.CountAsync();
+
+                var products = await _context.products
+                    .Include(x => x._Category)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var productDtos = products.Select(p => new ProductViewDto
+                {
+                    ProductId = p.Id,
+                    ProductName = p.ProductName,
+                    ProductDescription = p.ProductDescription,
+                    ProductPrice = p.ProductPrice,
+                    OfferPrize = p.offerPrize,
+                    Rating = p.Rating,
+                    ImageUrl = p.ImageUrl,
+                    StockId = p.StockId
+                }).ToList();
+
+                var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+                return new PagedResponseDTO<ProductViewDto>
+                {
+                    CurrentPage = pageNumber,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = totalPages,
+                    Items = productDtos
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
     }
 }

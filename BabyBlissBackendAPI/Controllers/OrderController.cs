@@ -14,6 +14,63 @@ namespace BabyBlissBackendAPI.Controllers
         {
             _orderService = orderService;
         }
+
+        [Authorize(Roles = "User")]
+        [HttpPost("razor-order-create")]
+        public async Task<IActionResult> RazorOrderCreate([FromQuery] long price)
+        {
+            try
+            {
+                if (price <= 0)
+                {
+                    return BadRequest(new ApiResponse<string>(false, "Enter a valid amount.", null, null));
+                }
+
+                // Call service to create Razorpay order
+                var orderId = await _orderService.RazorPayOrderCreate(price);
+
+                // Return the order ID in the response
+                return Ok(new ApiResponse<string>(true, "Order created", orderId, null));
+            }
+            catch (Exception ex)
+            {
+                // Simplify error handling and return the top-level error message
+                return BadRequest(new ApiResponse<string>(false, "Error creating order", null, ex.Message));
+            }
+        }
+
+        [Authorize]
+        [HttpPost("razor-payment-verify")]
+        public async Task<IActionResult> RazorPaymentVerify([FromBody] PaymentDto razorpay)
+        {
+            try
+            {
+                // Validate payment details
+                if (razorpay == null ||
+                    string.IsNullOrEmpty(razorpay.razorpay_payment_id) ||
+                    string.IsNullOrEmpty(razorpay.razorpay_order_id) ||
+                    string.IsNullOrEmpty(razorpay.razorpay_signature))
+                {
+                    return BadRequest(new ApiResponse<string>(false, "Invalid Razorpay payment details", null, null));
+                }
+
+                // Verify payment via service
+                var res = await _orderService.RazorPayment(razorpay);
+                if (!res)
+                {
+                    return BadRequest(new ApiResponse<string>(false, "Error in payment verification", "", "Check payment details"));
+                }
+
+                return Ok(new ApiResponse<string>(true, "Payment verified", "Success", null));
+            }
+            catch (Exception ex)
+            {
+                // Simplify error handling and return the top-level error message
+                return BadRequest(new ApiResponse<string>(false, "Error verifying payment", null, ex.Message));
+            }
+        }
+
+
         [Authorize(Roles = "Admin")]
         [HttpPatch("Manage-order-status/{oid}")]
         public async Task<IActionResult>OrderStatus(int oid)
@@ -48,7 +105,7 @@ namespace BabyBlissBackendAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpPost(" Place-order-all")]
+        [HttpPost("Place-order-all")]
         [Authorize]
         public async Task<IActionResult>PlaceOrder(CreateOrderDto createOrderDto)
         {
@@ -143,6 +200,26 @@ namespace BabyBlissBackendAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("paginated-orders")]
+        public async Task<ActionResult<PagedResponseDTO<OrderViewDto>>> GetPaginatedOrders(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                // Call the service to get the paginated orders
+                var result = await _orderService.GetPaginatedOrders(pageNumber, pageSize);
+
+                // Return a successful response with the result
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Return a 500 internal server error if something goes wrong
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
 
 
     }

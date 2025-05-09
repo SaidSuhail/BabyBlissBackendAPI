@@ -132,6 +132,15 @@ namespace BabyBlissBackendAPI.Controllers
             }
         }
 
+        [HttpDelete("clear/{userId}")]
+        public async Task<IActionResult> ClearCart(int userId)
+        {
+            var result = await _cartServices.ClearCart(userId);
+            if (!result.IsSuccess)
+                return NotFound(result);
+
+            return Ok(result);
+        }
 
     }
 }

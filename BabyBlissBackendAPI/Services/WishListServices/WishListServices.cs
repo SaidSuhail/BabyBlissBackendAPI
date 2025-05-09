@@ -91,13 +91,42 @@ namespace BabyBlissBackendAPI.Services.WishListServices
         }
 
 
+        //public async Task<ApiResponse<string>> RemoveFromWishList(int userid, int productid)
+        //{
+        //    try
+        //    {
+        //        var isExists = await _context.wishlist
+        //          .Include(a => a._Product)
+        //          .FirstOrDefaultAsync(b => b.Id == productid && b.UserId == userid);
+
+        //        if (isExists != null)
+        //        {
+        //            _context.wishlist.Remove(isExists);
+        //            await _context.SaveChangesAsync();
+        //            return new ApiResponse<string>(true, "Item removed from wishList", "done", null);
+        //        }
+
+        //        return new ApiResponse<string>(false, "Product not found", "", null);
+
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new InvalidOperationException(ex.Message);
+        //    }
+        //}
+
         public async Task<ApiResponse<string>> RemoveFromWishList(int userid, int productid)
         {
             try
             {
+                // Debug: Log the received parameters
+                Console.WriteLine($"Received request to remove product {productid} from wishlist for user {userid}");
+
+                // Query to check if the product exists in the user's wishlist
                 var isExists = await _context.wishlist
-                  .Include(a => a._Product)
-                  .FirstOrDefaultAsync(b => b.Id == productid && b.UserId == userid);
+                    .Where(w => w.UserId == userid && w.ProductId == productid) // Ensure both userId and productId match
+                    .FirstOrDefaultAsync();
 
                 if (isExists != null)
                 {
@@ -106,14 +135,20 @@ namespace BabyBlissBackendAPI.Services.WishListServices
                     return new ApiResponse<string>(true, "Item removed from wishList", "done", null);
                 }
 
-                return new ApiResponse<string>(false, "Product not found", "", null);
+                // Debug: Log the result if product not found
+                Console.WriteLine($"Product with id {productid} for user {userid} not found in wishlist.");
 
-
+                return new ApiResponse<string>(false, $"Product with id {productid} for user {userid} not found", "", null);
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException(ex.Message);
+                // Log the exception details
+                Console.WriteLine($"Error occurred: {ex.Message}");
+
+                // Return the error response with exception message
+                return new ApiResponse<string>(false, "An error occurred while removing from the wishlist", ex.Message, null);
             }
         }
+
     }
 }

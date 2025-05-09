@@ -93,11 +93,7 @@ namespace BabyBlissBackendAPI.Services.OrdersServices
                     throw new Exception("Product is out of stock");
                 }
 
-                // var order = await _context.orders
-                //.Include(a => a._Items)
-                //.ThenInclude(b => b.Product)
-                //.FirstOrDefaultAsync(c => c.UserId == userId);
-                // ✅ Address ownership check
+               
                 var address = await _context.userAddress
                     .FirstOrDefaultAsync(a => a.Id == order_Dto.AddId && a.UserId == userId);
 
@@ -155,28 +151,22 @@ namespace BabyBlissBackendAPI.Services.OrdersServices
                     throw new Exception("Cart is empty");
                 }
 
-                decimal total = cart._Items.Sum(item => item._Product.offerPrize * item.ProductQty);
-                string orderString = string.Join(", ", cart._Items.Select(item => item._Product.ProductName));
-                string transactionId = $"TXN{DateTime.Now.Ticks}"; // Or use Guid.NewGuid().ToString()
-
+              
 
                 var order = new Models.Order
                 {
                     UserId = userId,
                     OrderDate = DateTime.Now,
                     AddressId = createOrderDto.AddId,
-                    //Total = createOrderDto.Total ?? 0m,
-                    //OrderString = createOrderDto.OrderString,
-                    //TransactionId = createOrderDto.TransactionId,
-                    Total = total,
-                    OrderString = orderString,
-                    TransactionId = transactionId,
+                    Total = createOrderDto.Total ?? 0m,
+                    OrderString = createOrderDto.OrderString,
+                    TransactionId = createOrderDto.TransactionId,
                     _Items = cart._Items.Select(a => new OrderItems
                     {
                         ProductId = a._Product.Id,
                         Quantity = a.ProductQty,
-                        TotalPrice = a._Product.offerPrize * a.ProductQty
-
+                        TotalPrice = a._Product.offerPrize * a.ProductQty,
+                        ProductImage = a._Product.ImageUrl
                     }).ToList()
                 };
 
@@ -233,6 +223,7 @@ namespace BabyBlissBackendAPI.Services.OrdersServices
                             ProductName = b.Product.ProductName,
                             Quantity = b.Quantity,
                             TotalPrice = b.TotalPrice,
+                            ProductImage = b.Product.ImageUrl 
                         }).ToList(),
                     }).ToList();
 
@@ -266,6 +257,7 @@ namespace BabyBlissBackendAPI.Services.OrdersServices
                         UserName = a._UserAd.CustomerName,
                         Phone = a._UserAd.CustomerPhone,
                         UserAddress = a._UserAd.HomeAddress,
+                        TotalPrice = a.Total
 
 
                     }).ToList();
@@ -324,6 +316,7 @@ namespace BabyBlissBackendAPI.Services.OrdersServices
                     OrderStatus = a.OrderStatus,
                     OrderString = a.OrderString,
                     TransactionId = a.TransactionId,
+                    TotalPrice = a.Total,
                     Items = a._Items.Select(b => new OrderItemDto
                     {
                         OrderItemId = b.OrderId,
@@ -334,6 +327,8 @@ namespace BabyBlissBackendAPI.Services.OrdersServices
                         Quantity = b.Quantity,
                         TotalPrice = b.TotalPrice,
                     }).ToList(),
+                    //TotalPrice = a._Items.Sum(b => b.TotalPrice)
+
                 }).ToList();
 
                 return orderDetails;
@@ -355,9 +350,7 @@ namespace BabyBlissBackendAPI.Services.OrdersServices
                     throw new Exception("Order not found");
                 }
 
-                //const string? OrderPlaced = "OrderPlaced";
-                //const string? Delivered = "Delivered";
-
+               
 
                 order.OrderStatus = "Delivered";
 
@@ -371,6 +364,59 @@ namespace BabyBlissBackendAPI.Services.OrdersServices
                 throw new Exception(ex.InnerException?.Message);
             }
         }
+
+
+       public async Task<PagedResponseDTO<OrderViewDto>> GetPaginatedOrders(int pageNumber, int pageSize)
+{
+    try
+    {
+        pageNumber = Math.Max(pageNumber, 1);
+        pageSize = Math.Max(pageSize, 1);
+
+        var totalCount = await _context.orders.CountAsync();
+
+        var orders = await _context.orders
+            .Include(o => o._Items)     // Include order items
+            .Include(o => o._User)      // ✅ Include user info
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var orderDtos = orders.Select(o => new OrderViewDto
+        {
+            OrderId = o.Id,
+            OrderDate = o.OrderDate,
+            OrderStatus = o.OrderStatus,
+            OrderString = o.OrderString,
+            TransactionId = o.TransactionId,
+            Items = o._Items?.Select(i => new OrderItemDto
+            {
+                // Map order item details
+            }).ToList(),
+            TotalPrice = o.Total,
+            CustomerName = o._User?.UserName //
+        }).ToList();
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedResponseDTO<OrderViewDto>
+        {
+            CurrentPage = pageNumber,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+            Items = orderDtos
+        };
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("Error fetching paginated orders: " + ex.Message);
+    }
+}
+
+
+
+
 
     }
 }

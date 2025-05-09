@@ -12,5 +12,11 @@ namespace BabyBlissBackendAPI.Services.OrdersServices
         Task<int> TotalProductsPurchased();
         Task<List<OrderViewDto>> GetOrderDetailsAdmin_byuserId(int userId);
         Task<string> UpdateOrderStatus(int oId);
+        Task<PagedResponseDTO<OrderViewDto>> GetPaginatedOrders(int pageNumber, int pageSize);
+
+
+        // ✅ Razorpay methods
+        Task<string> RazorPayOrderCreate(long price);
+        Task<bool> RazorPayment(PaymentDto payment);
     }
 }

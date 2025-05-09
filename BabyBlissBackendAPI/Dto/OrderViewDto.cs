@@ -9,6 +9,9 @@
 
         public string TransactionId { get; set; }
         public List<OrderItemDto> Items { get; set; }
+        public decimal TotalPrice { get; set; }
+        //public decimal TotalAmount { get; internal set; }
+        public string CustomerName { get; set; } // ✅ Add this line
 
     }
 }

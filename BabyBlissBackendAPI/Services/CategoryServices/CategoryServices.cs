@@ -67,6 +67,7 @@ namespace BabyBlissBackendAPI.Services.CategoryServices
             }
             catch (Exception ex)
             {
+
                 throw new Exception($"An error occurred while saving chages: {ex.InnerException?.Message ?? ex.Message}");
 
             }
